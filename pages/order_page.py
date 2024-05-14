@@ -1,19 +1,14 @@
 import time
-
-import allure
-
 from locators.constructor_locators import ConstructorLocators
 from locators.order_page_locators import OrderPageLocators
+from conftest import random_user
+import allure
+from locators.my_account_locators import MyAccountLocators
 from pages.base_page import BasePage
-from conftest import driver, random_user
-
 
 class OrderPage(BasePage):
     def __init__(self, driver):
-        self.driver = driver
-
-    def execute(self, driver_command, params=None):
-        return self.driver.execute(driver_command, params)
+        super().__init__(driver)
 
     @allure.step("Click on Order Feed button")
     def click_on_order_feed(self):
@@ -44,7 +39,7 @@ class OrderPage(BasePage):
         self.click_on_element(ConstructorLocators.CONSTRUCTOR_BUTTON)
         self.drag_and_drop(ConstructorLocators.FIRST_INGREDIENT, ConstructorLocators.BASKET_LIST)
         self.click_on_element(OrderPageLocators.MAKE_ORDER_BUTTON)
-        time.sleep(10)
+        self.wait_for_text_to_change(OrderPageLocators.ORDERS_ALL_TIME_COUNTER_IN_POP_UP, "9999")
         after = int(self.get_text_from_element(OrderPageLocators.ORDERS_ALL_TIME_COUNTER_IN_POP_UP))
         return before, after
 
@@ -57,8 +52,8 @@ class OrderPage(BasePage):
         self.drag_and_drop(ConstructorLocators.FIRST_INGREDIENT, ConstructorLocators.BASKET_LIST)
         self.click_on_element(OrderPageLocators.MAKE_ORDER_BUTTON)
         self.click_on_element(OrderPageLocators.ORDER_MADE_CLOSE_BUTTON)
+        self.wait_for_text_to_change(OrderPageLocators.ORDERS_ALL_TIME_COUNTER_IN_POP_UP, "9999")
         self.click_on_order_feed()
-        time.sleep(10)
         after = int(self.get_text_from_element(OrderPageLocators.ORDERS_TODAY_COUNTER))
         return before, after
 
@@ -69,9 +64,27 @@ class OrderPage(BasePage):
         self.click_on_element(ConstructorLocators.CONSTRUCTOR_BUTTON)
         self.drag_and_drop(ConstructorLocators.FIRST_INGREDIENT, ConstructorLocators.BASKET_LIST)
         self.click_on_element(OrderPageLocators.MAKE_ORDER_BUTTON)
-        time.sleep(10)
+        self.wait_for_text_to_change(OrderPageLocators.ORDERS_ALL_TIME_COUNTER_IN_POP_UP, "9999")
         order_id = self.get_text_from_element(OrderPageLocators.ORDERS_ALL_TIME_COUNTER_IN_POP_UP)
         self.find_element_and_wait(OrderPageLocators.ORDER_MADE_CLOSE_BUTTON)
         self.click_on_element(OrderPageLocators.ORDER_MADE_CLOSE_BUTTON)
         self.click_on_order_feed()
         return order_id
+
+    @allure.step("Create user and login")
+    def create_user_and_login(self, random_user):
+        email = random_user["email"]
+        password = random_user["password"]
+        self.go_to_site()
+        self.click_on_my_account_button()
+        self.input_data_to_element(MyAccountLocators.RESTORE_PASSWORD_EMAIL_FIELD_INPUT, email)
+        self.input_data_to_element(MyAccountLocators.MY_ACCOUNT_PASSWORD_FIELD, password)
+        self.click_on_element(MyAccountLocators.MY_ACCOUNT_ENTER_BUTTON)
+
+    @allure.step("Click on My Account")
+    def click_on_my_account(self):
+        self.click_on_element(MyAccountLocators.GO_TO_MY_ACCOUNT)
+
+    @allure.step("Click on My Account button")
+    def click_on_my_account_button(self):
+        self.click_on_element(MyAccountLocators.GO_TO_MY_ACCOUNT)

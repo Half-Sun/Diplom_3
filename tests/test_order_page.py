@@ -1,7 +1,7 @@
 import allure
-import pytest
-from conftest import driver, random_user
-from locators.constructor_locators import ConstructorLocators
+from conftest import random_user
+
+from conftest import driver
 from locators.order_page_locators import OrderPageLocators
 from pages.order_page import OrderPage
 

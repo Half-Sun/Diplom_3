@@ -1,15 +1,12 @@
 import allure
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-
 from locators.my_account_locators import MyAccountLocators
 from pages.base_page import BasePage
-from conftest import driver, random_user
+from conftest import random_user
 
 
 class MyAccountPage(BasePage):
     @allure.step("Click on My Account button")
-    def click_on_my_account(self):
+    def click_on_my_account_button(self):
         self.click_on_element(MyAccountLocators.GO_TO_MY_ACCOUNT)
 
     @allure.step("Click on Restore Password button")
@@ -27,11 +24,11 @@ class MyAccountPage(BasePage):
         self.click_on_element(MyAccountLocators.RESTORE_PASSWORD_SHOW_PASSWORD_BUTTON)
 
     @allure.step("Create user and login")
-    def create_user_and_login(self, random_user):
-        email = random_user["email"]
-        password = random_user["password"]
+    def create_user_and_login(self):
+        email = random_user["email"]  # изменяем random_user на локальный импорт
+        password = random_user["password"]  # изменяем random_user на локальный импорт
         self.go_to_site()
-        self.click_on_my_account()
+        self.click_on_my_account_button()
         self.input_data_to_element(MyAccountLocators.RESTORE_PASSWORD_EMAIL_FIELD_INPUT, email)
         self.input_data_to_element(MyAccountLocators.MY_ACCOUNT_PASSWORD_FIELD, password)
         self.click_on_element(MyAccountLocators.MY_ACCOUNT_ENTER_BUTTON)
@@ -43,3 +40,7 @@ class MyAccountPage(BasePage):
     @allure.step("Click on My Account exit button")
     def click_on_my_account_exit_button(self):
         self.click_on_element(MyAccountLocators.MY_ACCOUNT_EXIT_BUTTON)
+
+    @allure.step("Click on My Account")
+    def click_on_my_account(self):
+        self.click_on_element(MyAccountLocators.GO_TO_MY_ACCOUNT)

@@ -1,3 +1,4 @@
+from selenium.common import TimeoutException
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver import ActionChains
@@ -11,6 +12,9 @@ class BasePage:
 
     def __init__(self, driver):
         self.driver = driver
+
+    def execute(self, driver_command, params=None):
+        return self.driver.execute(driver_command, params)
 
     @allure.step("Go to site")
     def go_to_site(self):
@@ -33,6 +37,12 @@ class BasePage:
     def click_on_element(self, locator):
         WebDriverWait(self.driver, 100).until(expected_conditions.element_to_be_clickable(locator)).click()
 
+    @allure.step("Find element and wait")
+    def wait_for_text_to_change(self, locator, old_text):
+        WebDriverWait(self.driver, 30).until(
+            lambda d: d.find_element(*locator).text != old_text,
+            f"Text did not change from '{old_text}' within 10 seconds."
+        )
     @allure.step("Input data to element")
     def input_data_to_element(self, locator, text):
         self.find_element_and_wait(locator).send_keys(text)
@@ -56,24 +66,4 @@ class BasePage:
         actions = ActionChains(self)
         actions.drag_and_drop(source_element, target_element).perform()
 
-    @allure.step("Create user and login")
-    def create_user_and_login(self, random_user):
-        email = random_user["email"]
-        password = random_user["password"]
-        self.go_to_site()
-        self.click_on_my_account()
-        self.input_data_to_element(MyAccountLocators.RESTORE_PASSWORD_EMAIL_FIELD_INPUT, email)
-        self.input_data_to_element(MyAccountLocators.MY_ACCOUNT_PASSWORD_FIELD, password)
-        self.click_on_element(MyAccountLocators.MY_ACCOUNT_ENTER_BUTTON)
 
-    @allure.step("Click on my account")
-    def click_on_my_account(self):
-        self.click_on_element(MyAccountLocators.GO_TO_MY_ACCOUNT)
-
-    @allure.step("Click on constructor button")
-    def click_on_constructor_button(self):
-        self.go_to_site()
-        self.click_on_element(ConstructorLocators.GO_TO_MY_ACCOUNT)
-        self.click_on_element(ConstructorLocators.CONSTRUCTOR_BUTTON)
-        burger_text = self.get_text_from_element(ConstructorLocators.BURGER_TEXT)
-        return burger_text
