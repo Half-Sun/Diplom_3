@@ -1,9 +1,13 @@
 import pytest
+import logging
 from selenium import webdriver
 import requests
 from faker import Faker
 
 fake = Faker()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @pytest.fixture(params=['firefox', 'chrome'])
 def driver(request):
@@ -14,8 +18,6 @@ def driver(request):
     driver_instance.maximize_window()
     yield driver_instance
     driver_instance.quit()
-
-fake = Faker()
 
 @pytest.fixture(scope="function")
 def random_user():
@@ -30,18 +32,14 @@ def random_user():
         "name": name
     }
     response = requests.post(register_url, json=register_data)
-
-    if response.status_code != 200:
-        raise AssertionError(f"Failed to register user. Response: {response.json()}")
+    response.raise_for_status()
 
     access_token = response.json()["accessToken"]
 
     user_info_url = "https://stellarburgers.nomoreparties.site/api/auth/user"
     headers = {"Authorization": f"{access_token}"}
     user_info_response = requests.get(user_info_url, headers=headers)
-
-    if user_info_response.status_code != 200:
-        raise AssertionError(f"Failed to get user info. Response: {user_info_response.json()}")
+    user_info_response.raise_for_status()
 
     yield {
         "email": email,
@@ -55,4 +53,4 @@ def random_user():
     delete_user_response = requests.delete(delete_user_url, headers=headers)
 
     if not delete_user_response.json().get('success', False):
-        print(f"Failed to delete user. Response: {delete_user_response.json()}")
+        logger.error(f"Failed to delete user. Response: {delete_user_response.json()}")

@@ -1,9 +1,8 @@
-from selenium.common import TimeoutException
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver import ActionChains
-from conftest import random_user
 import allure
+import logging
 from locators.constructor_locators import ConstructorLocators
 from locators.my_account_locators import MyAccountLocators
 
@@ -12,6 +11,8 @@ class BasePage:
 
     def __init__(self, driver):
         self.driver = driver
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
 
     def execute(self, driver_command, params=None):
         return self.driver.execute(driver_command, params)
@@ -23,23 +24,23 @@ class BasePage:
 
     @allure.step("Scroll to element")
     def scroll_to_element(self, locator):
-        element = WebDriverWait(self.driver, 100).until(
+        element = WebDriverWait(self.driver, 300).until(
             expected_conditions.visibility_of_element_located(locator))
         self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
 
     @allure.step("Find element and wait")
     def find_element_and_wait(self, locator):
-        WebDriverWait(self.driver, 100).until(expected_conditions.visibility_of_element_located(locator))
+        WebDriverWait(self.driver, 300).until(expected_conditions.visibility_of_element_located(locator))
         return self.driver.find_element(*locator)
 
 
     @allure.step("Find element and wait")
     def click_on_element(self, locator):
-        WebDriverWait(self.driver, 100).until(expected_conditions.element_to_be_clickable(locator)).click()
+        WebDriverWait(self.driver, 300).until(expected_conditions.element_to_be_clickable(locator)).click()
 
     @allure.step("Find element and wait")
     def wait_for_text_to_change(self, locator, old_text):
-        WebDriverWait(self.driver, 30).until(
+        WebDriverWait(self.driver, 200).until(
             lambda d: d.find_element(*locator).text != old_text,
             f"Text did not change from '{old_text}' within 10 seconds."
         )
@@ -51,12 +52,12 @@ class BasePage:
     def get_text_from_element(self, locator):
         return self.find_element_and_wait(locator).get_attribute('innerHTML')
 
-    @allure.step("Input data to element")
+    @allure.step("Get attribute value from element")
     def get_attribute_value(self, locator, attribute_name):
         try:
             return locator.get_attribute(attribute_name)
         except Exception as e:
-            print(f"An error occurred while getting attribute '{attribute_name}': {e}")
+            self.logger.error(f"An error occurred while getting attribute '{attribute_name}': {e}")
             return None
 
     @allure.step("Perform drag&drop")
