@@ -1,13 +1,13 @@
+import allure
 import pytest
-import logging
 from selenium import webdriver
 import requests
 from faker import Faker
 
-fake = Faker()
+from locators.my_account_locators import MyAccountLocators
+from pages.my_account_page import MyAccountPage
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+fake = Faker()
 
 @pytest.fixture(params=['firefox', 'chrome'])
 def driver(request):
@@ -32,14 +32,7 @@ def random_user():
         "name": name
     }
     response = requests.post(register_url, json=register_data)
-    response.raise_for_status()
-
     access_token = response.json()["accessToken"]
-
-    user_info_url = "https://stellarburgers.nomoreparties.site/api/auth/user"
-    headers = {"Authorization": f"{access_token}"}
-    user_info_response = requests.get(user_info_url, headers=headers)
-    user_info_response.raise_for_status()
 
     yield {
         "email": email,
@@ -50,7 +43,24 @@ def random_user():
 
     delete_user_url = "https://stellarburgers.nomoreparties.site/api/auth/user"
     headers = {"Authorization": f"{access_token}"}
-    delete_user_response = requests.delete(delete_user_url, headers=headers)
+    requests.delete(delete_user_url, headers=headers)
 
-    if not delete_user_response.json().get('success', False):
-        logger.error(f"Failed to delete user. Response: {delete_user_response.json()}")
+@pytest.fixture
+def restore_password_page(random_user, driver):
+    page = MyAccountPage(driver)
+    page.go_to_site()
+    page.click_on_my_account()
+    page.click_on_restore_password_button()
+    return page
+
+@pytest.fixture(scope="function")
+def create_user_and_login(driver, random_user):
+    page = MyAccountPage(driver)
+    email = random_user["email"]
+    password = random_user["password"]
+    page.go_to_site()
+    page.click_on_my_account()
+    page.input_data_to_element(MyAccountLocators.RESTORE_PASSWORD_EMAIL_FIELD_INPUT, email)
+    page.input_data_to_element(MyAccountLocators.MY_ACCOUNT_PASSWORD_FIELD, password)
+    page.click_on_element(MyAccountLocators.MY_ACCOUNT_ENTER_BUTTON)
+    return page

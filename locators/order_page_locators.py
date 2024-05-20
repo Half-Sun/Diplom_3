@@ -13,7 +13,4 @@ class OrderPageLocators:
                                              "p.OrderFeed_number__2MbrQ.text.text_type_digits-large")
     ORDER_MADE_CLOSE_BUTTON = By.CLASS_NAME, "Modal_modal__close_modified__3V5XS"
     ORDER_PROGRESS_FEED = By.CSS_SELECTOR, "ul.OrderFeed_orderListReady__1YFem li.text.text_type_digits-default.mb-2"
-    ORDER_CONSTRUCTOR_BUTTON = By.XPATH, '//p[@class="AppHeader_header__linkText__3q_va ml-2" and text()="Конструктор"]'
-    ORDER_FIRST_INGREDIENT = By.CSS_SELECTOR, "ul.BurgerIngredients_ingredients__list__2A-mT > a.BurgerIngredient_ingredient__1TVf6:nth-of-type(1)"
-    ORDER_BASKET_LIST = By.CSS_SELECTOR, 'li.BurgerConstructor_basket__listItem__aWMu1.mr-4'
-    ORDER_TO_MY_ACCOUNT = By.XPATH, '//p[@class="AppHeader_header__linkText__3q_va ml-2" and text()="Личный Кабинет"]'
+
